@@ -22,11 +22,10 @@ RUN apk --no-cache update && \
         zip \
         git \
         openssh \
-        postgresql-dev \
         yarn && \
     pip --no-cache-dir install awscli virtualenv && \
     update-ca-certificates && \
     rm -rf /var/cache/apk/* && \
-    yarn global add serverless@$SERVERLESS_VERSION
+    npm install --global --silent serverless@$SERVERLESS_VERSION
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
