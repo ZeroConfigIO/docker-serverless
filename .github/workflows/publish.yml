@@ -49,7 +49,7 @@ jobs:
           image_repository="$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' | sed 's/docker-//')"
           echo "$image_repository"
           echo "::set-output name=image_repository::$image_repository"
-          latest_published_tag="$(curl -L -s "https://hub.docker.com/v2/repositories/$image_repository/tags/?page_size=1024&page=1&ordering=last_updated" | jq '.results | .[1] | .name')"
+          latest_published_tag="$(curl -L -s "https://hub.docker.com/v2/repositories/$image_repository/tags/?page_size=1024&page=1&ordering=last_updated" | jq '.results | .[1] | .name' | sed 's/"//g')"
           echo "$latest_published_tag"
           echo "::set-output name=latest_published_tag::$latest_published_tag"
 
