@@ -21,9 +21,6 @@ on:
   schedule:
     - cron: '0 0 * * 1'
 
-permissions:
-  contents: read
-
 jobs:
   scan:
     permissions:
@@ -44,7 +41,6 @@ jobs:
           image: "localbuild/testimage:latest"
           fail-build: false
           severity-cutoff: critical
-          acs-report-enable: true
 
       - name: Inspect action SARIF report
         run: cat ${{ steps.scan.outputs.sarif }}
