@@ -12,18 +12,18 @@
 - alpine linux
 - serverless
 - python3
-- node 14
+- node 16
 - awscli
 
 ## Usage
 
-  cmd:
+  Command:
 
   ```
   $ docker run -it --rm zeroconfigio/serverless:latest "sls --version"
   ```
 
-  Output:
+  Output Example:
 
   ```
   Framework Core: 3.15.2
