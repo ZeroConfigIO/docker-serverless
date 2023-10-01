@@ -1,39 +1,49 @@
 # docker-serverless
 
-![Security](https://github.com/ZeroConfigIO/docker-serverless/workflows/Anchore%20Container%20Scan/badge.svg)
-![Build](https://github.com/ZeroConfigIO/docker-serverless/workflows/Publish%20Docker%20Image/badge.svg)
-![Lint](https://github.com/ZeroConfigIO/docker-serverless/workflows/Hadolint/badge.svg)
+[![Security](https://github.com/zeroconfigio/docker-serverless/actions/workflows/anchore.yml/badge.svg?branch=main)](https://github.com/zeroconfigio/docker-serverless/actions/workflows/anchore.yml)
+[![Hadolint](https://github.com/zeroconfigio/docker-serverless/actions/workflows/hadolint.yml/badge.svg?branch=main)](https://github.com/zeroconfigio/docker-serverless/actions/workflows/hadolint.yml)
+[![Publish](https://github.com/zeroconfigio/docker-serverless/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/zeroconfigio/docker-serverless/actions/workflows/publish.yml)
 
+## Unofficial Docker image for Serverless Framework deployment
 
-### Unofficial Docker image for Serverless Framework deployment
+### Contents
 
-#### Contents:
-
-- alpine linux
-- serverless
-- python3
-- node 16
+- Alpine Linux
+- Serverless
+- Python3
+- Node LTS
 - awscli
+
+### Architectures
+
+- amd64
+- arm64/v8
+- arm/v7
+- arm/v6
+- ppc64le
+- s390x (dropped support on Serverless v3.35.2 and onwards)
 
 ## Usage
 
-  Command:
+Command:
 
-  ```
-  $ docker run -it --rm zeroconfigio/serverless:latest "sls --version"
-  ```
+```bash
+docker run -it --rm zeroconfigio/serverless:latest "sls --version"
+```
 
-  Output Example:
+Output Example:
 
-  ```
-  Framework Core: 3.15.2
-  Plugin: 6.2.2
-  SDK: 4.3.2
-  ```
+```bash
+Framework Core: 3.15.2
+Plugin: 6.2.2
+SDK: 4.3.2
+```
 
 
 ## Author
+
 [ZeroConfig.io](https://github.com/ZeroConfigIO)
 
 ## License
+
 MIT Licensed. See [LICENSE](https://github.com/ZeroConfigIO/docker-serverless/blob/master/LICENSE) for full details.

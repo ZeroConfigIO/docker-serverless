@@ -11,7 +11,7 @@ env:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
 
     permissions:
       packages: write
@@ -33,48 +33,28 @@ jobs:
         run: |
           version="$(git ls-remote --tags --refs --sort="v:refname" https://github.com/serverless/serverless.git | awk '{print $2}' | sed 's/refs\/tags\/v//' | tail -n1)"
           echo "$version"
-          echo "::set-output name=version::$version"
-
-      - name: Get Last Release Tag
-        id: tags
-        run: |
-          latest="$(git ls-remote --tags --refs --sort="v:refname" https://github.com/${{ github.repository }}.git | awk '{print $2}' | sed 's/refs\/tags\/v//' | tail -n1)"
-          echo "$latest"
-          echo "::set-output name=latest::$latest"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Get Last Published Tag
-#         if: ${{ steps.sls.outputs.version != steps.tags.outputs.latest }}
+        # if: ${{ steps.sls.outputs.version != steps.tags.outputs.latest }}
         id: docker
         run: |
           image_repository="$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' | sed 's/docker-//')"
           echo "$image_repository"
-          echo "::set-output name=image_repository::$image_repository"
+          echo "image_repository=$image_repository" >> "$GITHUB_OUTPUT"
           latest_published_tag="$(curl -L -s "https://hub.docker.com/v2/repositories/$image_repository/tags/?page_size=1024&page=1&ordering=last_updated" | jq '.results | .[1] | .name' | sed 's/"//g')"
           echo "$latest_published_tag"
-          echo "::set-output name=latest_published_tag::$latest_published_tag"
-
-      - name: Release snapshot
-        if: ${{ steps.sls.outputs.version != steps.tags.outputs.latest }}
-        id: release-snapshot
-        uses: actions/create-release@latest
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          tag_name: v${{ steps.sls.outputs.version }}
-          release_name: v${{ steps.sls.outputs.version }}
-          draft: false
-          prerelease: false
+          echo "latest_published_tag=$latest_published_tag" >> "$GITHUB_OUTPUT"
 
       - name: Docker metadata
         if: ${{ steps.docker.outputs.latest_published_tag != steps.sls.outputs.version }}
         id: meta
-        uses: docker/metadata-action@v4.0.1
+        uses: docker/metadata-action@v5
         with:
           images: |
             ${{ steps.docker.outputs.image_repository }}
-#            ghcr.io/${{ steps.docker.outputs.image_repository }}
-#            public.ecr.aws/${{ steps.docker.outputs.image_repository }}
+            ghcr.io/${{ steps.docker.outputs.image_repository }}
+#             public.ecr.aws/${{ steps.docker.outputs.image_repository }}
           labels: |
             org.opencontainers.image.authors=${{ github.repository_owner }}
           tags: |
@@ -85,12 +65,12 @@ jobs:
       - name: Set up QEMU
         if: ${{ steps.docker.outputs.latest_published_tag != steps.sls.outputs.version }}
         id: qemu
-        uses: docker/setup-qemu-action@v2.0.0
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         if: ${{ steps.docker.outputs.latest_published_tag != steps.sls.outputs.version }}
         id: buildx
-        uses: docker/setup-buildx-action@v2.0.0
+        uses: docker/setup-buildx-action@v3
         with:
           install: true
           driver-opts: image=moby/buildkit:master
@@ -98,22 +78,22 @@ jobs:
       - name: Login to DockerHub
         if: ${{ steps.docker.outputs.latest_published_tag != steps.sls.outputs.version }}
         id: login-dockerhub
-        uses: docker/login-action@v2.0.0
+        uses: docker/login-action@v3
         with:
           logout: false
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # - name: Login to GitHub Container Registry
-      #   uses: docker/login-action@v1
-      #   with:
-      #     registry: ghcr.io
-      #     # username: ${{ github.repository_owner }}
-      #     username: ${{ github.actor }}
-      #     password: ${{ github.token }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          # username: ${{ github.repository_owner }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       # - name: Login to Public ECR
-      #   uses: docker/login-action@v1
+      #   uses: docker/login-action@v3
       #   with:
       #     registry: public.ecr.aws
       #     username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
@@ -124,11 +104,12 @@ jobs:
       - name: Build and push Docker images
         if: ${{ steps.docker.outputs.latest_published_tag != steps.sls.outputs.version }}
         id: build-and-push
-        uses: docker/build-push-action@v3.0.0
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.event_name != 'pull_request' }}
           context: .
-          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/ppc64le,linux/s390x
+          # platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/ppc64le,linux/s390x
+          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/ppc64le
           build-args: SERVERLESS_VERSION=${{ steps.sls.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
