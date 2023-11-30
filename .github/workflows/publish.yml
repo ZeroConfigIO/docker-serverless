@@ -2,6 +2,11 @@ name: Publish Docker Image
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Serverless Version"
+        default: "latest"
+        required: false
   schedule:
     - cron: '0 0 * * 1' # At 00:00 on Monday.
 
@@ -28,15 +33,19 @@ jobs:
         run: |
           sudo apt-get install jq
 
-      - name: Get Last Serverless Tag
+      - name: Get Serverless Version
         id: sls
         run: |
+          required_version="${{ github.event.inputs.version }}"
           version="$(git ls-remote --tags --refs --sort="v:refname" https://github.com/serverless/serverless.git | awk '{print $2}' | sed 's/refs\/tags\/v//' | tail -n1)"
+          if [[ "$required_version" != "latest" ]]; then
+            echo "version=$required_version" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          fi
           echo "$version"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Get Last Published Tag
-        # if: ${{ steps.sls.outputs.version != steps.tags.outputs.latest }}
+      - name: Get Last Published Version
         id: docker
         run: |
           image_repository="$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' | sed 's/docker-//')"
@@ -109,7 +118,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           context: .
           # platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/ppc64le,linux/s390x
-          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/ppc64le
+          platforms: linux/amd64,linux/arm64/v8
           build-args: SERVERLESS_VERSION=${{ steps.sls.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}

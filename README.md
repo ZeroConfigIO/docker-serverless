@@ -18,9 +18,12 @@
 
 - amd64
 - arm64/v8
-- arm/v7
-- arm/v6
-- ppc64le
+
+#### Not supported
+
+- arm/v7 (dropped support on Serverless v3.37.0 and onwards)
+- arm/v6 (dropped support on Serverless v3.37.0 and onwards)
+- ppc64le (dropped support on Serverless v3.37.0 and onwards)
 - s390x (dropped support on Serverless v3.35.2 and onwards)
 
 ## Usage
@@ -38,7 +41,6 @@ Framework Core: 3.15.2
 Plugin: 6.2.2
 SDK: 4.3.2
 ```
-
 
 ## Author
 
