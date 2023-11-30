@@ -39,11 +39,12 @@ jobs:
           required_version="${{ github.event.inputs.version }}"
           version="$(git ls-remote --tags --refs --sort="v:refname" https://github.com/serverless/serverless.git | awk '{print $2}' | sed 's/refs\/tags\/v//' | tail -n1)"
           if [[ "$required_version" != "latest" ]]; then
+            echo "$required_version"
             echo "version=$required_version" >> "$GITHUB_OUTPUT"
           else
+            echo "$version"
             echo "version=$version" >> "$GITHUB_OUTPUT"
           fi
-          echo "$version"
 
       - name: Get Last Published Version
         id: docker
