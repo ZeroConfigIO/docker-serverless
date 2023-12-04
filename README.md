@@ -4,7 +4,7 @@
 [![Hadolint](https://github.com/zeroconfigio/docker-serverless/actions/workflows/hadolint.yml/badge.svg?branch=main)](https://github.com/zeroconfigio/docker-serverless/actions/workflows/hadolint.yml)
 [![Publish](https://github.com/zeroconfigio/docker-serverless/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/zeroconfigio/docker-serverless/actions/workflows/publish.yml)
 
-## Unofficial Docker image for Serverless Framework deployment
+## Unofficial Docker image for Serverless Framework deployments
 
 ### Contents
 
@@ -16,8 +16,8 @@
 
 ### Architectures
 
-- amd64
-- arm64/v8
+- linux/arm64
+- linux/amd64
 
 #### Not supported
 

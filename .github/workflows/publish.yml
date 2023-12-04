@@ -38,11 +38,11 @@ jobs:
         run: |
           required_version="${{ github.event.inputs.version }}"
           version="$(git ls-remote --tags --refs --sort="v:refname" https://github.com/serverless/serverless.git | awk '{print $2}' | sed 's/refs\/tags\/v//' | tail -n1)"
-          if [[ "$required_version" != "latest" ]]; then
-            echo "$required_version"
+          if [[ -n "$required_version" ]]; then
+            echo "Required version: $required_version"
             echo "version=$required_version" >> "$GITHUB_OUTPUT"
           else
-            echo "$version"
+            echo "Computed version: $version"
             echo "version=$version" >> "$GITHUB_OUTPUT"
           fi
 
@@ -98,7 +98,6 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          # username: ${{ github.repository_owner }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
@@ -119,7 +118,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           context: .
           # platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/ppc64le,linux/s390x
-          platforms: linux/amd64,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64
           build-args: SERVERLESS_VERSION=${{ steps.sls.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
