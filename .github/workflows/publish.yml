@@ -28,16 +28,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 'main'
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
       - name: Install Dependencies
         run: |
           sudo apt-get install jq
 
-      - name: Get Serverless Version
+      - name: Get Latest Serverless Version
         id: sls
         run: |
           required_version="${{ github.event.inputs.version }}"
-          version="$(git ls-remote --tags --refs --sort="v:refname" https://github.com/serverless/serverless.git | awk '{print $2}' | sed 's/refs\/tags\/v//' | tail -n1)"
+          version="$(npm view serverless version)"
           if [[ -n "$required_version" ]]; then
             echo "Required version: $required_version"
             echo "version=$required_version" >> "$GITHUB_OUTPUT"
@@ -46,13 +52,13 @@ jobs:
             echo "version=$version" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Get Last Published Version
+      - name: Get Latest Published Docker Version
         id: docker
         run: |
           image_repository="$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' | sed 's/docker-//')"
           echo "$image_repository"
           echo "image_repository=$image_repository" >> "$GITHUB_OUTPUT"
-          latest_published_tag="$(curl -L -s "https://hub.docker.com/v2/repositories/$image_repository/tags/?page_size=1024&page=1&ordering=last_updated" | jq '.results | .[1] | .name' | sed 's/"//g')"
+          latest_published_tag="$(curl -L -s "https://hub.docker.com/v2/repositories/$image_repository/tags/?page_size=2&page=1&ordering=last_updated" | jq '.results | .[1] | .name' | sed 's/"//g')"
           echo "$latest_published_tag"
           echo "latest_published_tag=$latest_published_tag" >> "$GITHUB_OUTPUT"
 
